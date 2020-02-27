@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= htmlWebpackPlugin.options.title %></title>
+  <style>
+    html {
+      box-sizing: border-box;
+    }
+
+    *::before,
+    *::after {
+      box-sizing: inherit;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0 auto;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    body {
+      background: black;
+      color: #CCCCCC;
+    }
+
+    div {
+      float: left;
+      border: 1px solid #444444;
+      padding: 10px;
+      margin: 10px;
+      background: #3B3B3B;
+    }
+
+    #video {
+      display: none;
+    }
+
+    #intermediate {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <noscript>
+    <h1>This application requires JavaScript. Please enable JavaScript in your browser's settings.</h1>
+  </noscript>
+
+  <main id="application-root">
+    <div>
+      <video id="video" autoplay></video>
+      <canvas id="intermediate" width="600" height="400"></canvas>
+      <canvas id="display" width="600" height="400"></canvas>
+    </div>
+  </main>
+
+  <script tyep="text/javascript">
+    let processor = {
+      timerCallback: function () {
+        if (this.video.paused || this.video.ended) {
+          return;
+        }
+
+        this.computeFrame();
+
+        requestAnimationFrame(() => {
+          this.timerCallback();
+        });
+      },
+
+      computeFrame: function () {
+        this.ctx1.drawImage(this.video, 0, 0, this.width, this.height);
+        const frame = this.ctx1.getImageData(0, 0, this.width, this.height);
+        const l = frame.data.length / 4;
+
+        for (let i = 0; i < l; i++) {
+          const grey = (frame.data[i * 4 + 0] + frame.data[i * 4 + 1] + frame.data[i * 4 + 2]) / 3;
+
+          frame.data[i * 4 + 0] = grey;
+          frame.data[i * 4 + 1] = grey;
+          frame.data[i * 4 + 2] = grey;
+        }
+
+        this.ctx2.putImageData(frame, 0, 0);
+
+        return;
+      },
+
+      doLoad: function () {
+        const self = this;
+
+        const constraints = {
+          video: true,
+          audio: true
+        };
+
+        function playCallback() {
+          console.log(self);
+          this.width = this.video.videoWidth;
+          this.height = this.video.videoHeight;
+          this.timerCallback();
+        };
+
+        const boundCallback = playCallback.bind(this);
+
+        console.log(this, self);
+
+        this.video = document.getElementById("video");
+        this.intermediate = document.getElementById("intermediate");
+        this.ctx1 = this.intermediate.getContext("2d");
+        this.display = document.getElementById("display");
+        this.ctx2 = this.display.getContext("2d");
+
+        navigator.mediaDevices.getUserMedia(constraints).
+          then((stream) => { this.video.srcObject = stream });
+
+        this.video.addEventListener("play", boundCallback, false);
+      },
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      processor.doLoad();
+    });
+  </script>
+</body>
+
+</html>

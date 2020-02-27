@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= htmlWebpackPlugin.options.title %></title>
+  <style>
+    html {
+      box-sizing: border-box;
+    }
+
+    *::before,
+    *::after {
+      box-sizing: inherit;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0 auto;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    body {
+      background: black;
+      color: #CCCCCC;
+    }
+
+    div {
+      clear: both;
+      float: left;
+      border: 1px solid #444444;
+      padding: 10px;
+      margin: 10px;
+      background: #3B3B3B;
+    }
+  </style>
+</head>
+
+<body>
+  <noscript>
+    <h1>This application requires JavaScript. Please enable JavaScript in your browser's settings.</h1>
+  </noscript>
+
+  <main id="application-root">
+    <div>
+      <canvas id="display" width="600" height="400"></canvas>
+    </div>
+    <div>
+      <canvas id="intermediate" width="600" height="400" /></canvas>
+      <video id="video" width="600" height="400" muted style="display: none;" />
+    </div>
+  </main>
+  <script type="text/javascript" src="./vendor/jeelizFaceFilter.js"></script>
+  <script type="text/javascript" src="./vendor/Canvas2DDisplay.js"></script>
+  <script type="text/javascript" src="./index.js"></script>
+</body>
+
+</html>
