@@ -29,12 +29,18 @@
     }
 
     div {
-      clear: both;
-      float: left;
       border: 1px solid #444444;
       padding: 10px;
       margin: 10px;
       background: #3B3B3B;
+    }
+
+    #right {
+      float: right;
+    }
+
+    #left {
+      float: left;
     }
   </style>
 </head>
@@ -45,12 +51,11 @@
   </noscript>
 
   <main id="application-root">
-    <div>
-      <canvas id="display" width="600" height="400"></canvas>
+    <div id="left">
+      <canvas id="display" width="400" height="320"></canvas>
     </div>
-    <div>
-      <canvas id="intermediate" width="600" height="400" /></canvas>
-      <video id="video" width="600" height="400" muted style="display: none;" />
+    <div id="right">
+      <canvas id="intermediate" width="400" height="320" /></canvas>
     </div>
   </main>
   <script type="text/javascript" src="./vendor/jeelizFaceFilter.js"></script>

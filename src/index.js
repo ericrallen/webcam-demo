@@ -6,12 +6,9 @@ function randomIntFromInterval(min, max) {
 var CVD; //return of Canvas2DDisplay
 
 var drawnBlocks = [];
-var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-var analyser = audioCtx.createAnalyser();
-var audio = document.getElementById("audio");
-var video = document.getElementById("video");
+var analyser;
 var intermediate = document.getElementById("intermediate");
-var ctx = intermediate.getContext("2d");
+var canvasCtx = intermediate.getContext("2d");
 
 JEEFACEFILTERAPI.init({
   canvasId: "display",
@@ -28,15 +25,59 @@ JEEFACEFILTERAPI.init({
         audio: true
       })
       .then(stream => {
-        var source = audioCtx.createMediaStreamSource(stream);
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        analyser.minDecibels = -90;
+        analyser.maxDecibels = -10;
+        analyser.smoothingTimeConstant = 0.85;
+
+        distortion = audioCtx.createWaveShaper();
+        gainNode = audioCtx.createGain();
+        biquadFilter = audioCtx.createBiquadFilter();
+        convolver = audioCtx.createConvolver();
+        source = audioCtx.createMediaStreamSource(stream);
         source.connect(analyser);
-        video.srcObject = stream;
+
+        analyser.fftSize = 2048;
       });
   }, //end callbackReady()
 
   //called at each render iteration (drawing loop) :
   callbackTrack: function(detectState) {
-    ctx.drawImage(video, 0, 0, 600, 400);
+    if (analyser) {
+      var bufferLength = analyser.fftSize;
+      var dataArray = new Uint8Array(bufferLength);
+
+      canvasCtx.clearRect(0, 0, intermediate.width, intermediate.height);
+
+      analyser.getByteTimeDomainData(dataArray);
+
+      canvasCtx.fillStyle = "rgb(200, 200, 200)";
+      canvasCtx.fillRect(0, 0, intermediate.width, intermediate.height);
+
+      canvasCtx.lineWidth = 2;
+      canvasCtx.strokeStyle = "rgb(0, 0, 0)";
+      canvasCtx.beginPath();
+
+      var sliceWidth = (intermediate.width * 1.0) / bufferLength;
+      var x = 0;
+
+      for (var i = 0; i < bufferLength; i++) {
+        var v = dataArray[i] / 128.0;
+        var y = (v * intermediate.height) / 2;
+
+        if (i === 0) {
+          canvasCtx.moveTo(x, y);
+        } else {
+          canvasCtx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+      }
+
+      canvasCtx.lineTo(intermediate.width, intermediate.height / 2);
+      canvasCtx.stroke();
+    }
 
     CVD.ctx.globalAlpha = 1.0;
 
@@ -47,14 +88,7 @@ JEEFACEFILTERAPI.init({
 
     CVD.ctx.fillRect(0, 0, CVD.canvas.width, CVD.canvas.height);
 
-    analyser.fftSize = 2048;
-    var bufferLength = analyser.frequencyBinCount;
-    var dataArray = new Uint8Array(bufferLength);
-
-    analyser.getByteTimeDomainData(dataArray);
-
     if (detectState.detected > 0.6) {
-      //draw a border around the face
       var faceCoo = CVD.getCoordinates(detectState);
 
       var ghostBlocks = 0;
@@ -68,16 +102,7 @@ JEEFACEFILTERAPI.init({
 
       CVD.ctx.fillStyle = "white";
 
-      var barHeight = dataArray[randomIntFromInterval(0, bufferLength)] / 2;
-
-      var rgbAdjust = randomIntFromInterval(0, 2);
-
-      var rgb = [barHeight + 100, 50, 50];
-
-      // rgb[rgbAdjust] = barHeight + 100;
-
-      CVD.ctx.shadowColor = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-      CVD.ctx.shadowBlur = randomIntFromInterval(0, barHeight / 25);
+      var variance = 0;
 
       for (
         var y = faceCoo.y - 12;
@@ -91,15 +116,24 @@ JEEFACEFILTERAPI.init({
         ) {
           ghostBlocks++;
 
-          drawnBlocks.push([x, y, 10, 10]);
+          variance = dataArray[x + y] !== 128 ? dataArray[x + y] / 128.0 : 0;
+
+          var rgb = [
+            variance > 0.1 || variance < -0.1 ? variance * 100 : 50,
+            50,
+            50
+          ];
+
+          CVD.ctx.shadowColor = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+          CVD.ctx.shadowBlur = randomIntFromInterval(0, variance * 10);
+
+          drawnBlocks.push([x, y, 10, 10, variance]);
 
           CVD.ctx.fillRect(x, y, 10, 10);
         }
       }
 
-      var ghosts = randomIntFromInterval(1.5, 4.5);
-
-      CVD.ctx.globalAlpha = barHeight / 100;
+      var ghosts = randomIntFromInterval(1.5, 3.25);
 
       for (var i = 0; i < ghostBlocks * ghosts; i++) {
         var ghost = drawnBlocks[i];
@@ -109,6 +143,10 @@ JEEFACEFILTERAPI.init({
         }
 
         if (ghost) {
+          CVD.ctx.globalAlpha = ghost[4]
+            ? ghost[4] / 2
+            : randomIntFromInterval(0.01, 0.5);
+
           CVD.ctx.fillRect(ghost[0], ghost[1], ghost[2], ghost[3]);
         } else {
           break;
