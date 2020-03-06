@@ -1,0 +1,69 @@
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title>TensorFlow Body Detection Demo</title>
+  <style>
+    html {
+      box-sizing: border-box;
+    }
+
+    *::before,
+    *::after {
+      box-sizing: inherit;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0 auto;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    body {
+      background: black;
+      color: #CCCCCC;
+    }
+
+    #loading,
+    #main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+    }
+
+    #video {
+      display: none !important;
+    }
+
+    #output,
+    #video {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <noscript>
+    <h2>This application requires JavaScript. Please enable JavaScript in your browser's settings.</h2>
+  </noscript>
+  <section id="loading">
+    <img src="./media/loader.png" />
+  </section>
+  <main id='main' style='display:none'>
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="output"></canvas>
+  </main>
+</body>
+<!-- Load TensorFlow.js -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.2"></script>
+<!-- Load BodyPix -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.0"></script>
+<script src="./tf-demo.js"></script>
+
+</html>
