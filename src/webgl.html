@@ -1,0 +1,75 @@
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title>WebGL Demo</title>
+  <style>
+    html {
+      box-sizing: border-box;
+    }
+
+    *::before,
+    *::after {
+      box-sizing: inherit;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0 auto;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    body {
+      background: black;
+      color: #CCCCCC;
+    }
+
+    #loading,
+    #main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+    }
+
+    #video {
+      display: none !important;
+    }
+
+    #output,
+    #video {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <noscript>
+    <h2>This application requires JavaScript. Please enable JavaScript in your browser's settings.</h2>
+  </noscript>
+  <section id="loading">
+    <img src="./media/loader.png" />
+  </section>
+  <main id='main' style='display:none'>
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="output"></canvas>
+  </main>
+</body>
+<script src="./vendor/three/three.js"></script>
+<script src="./vendor/three/CopyShader.js"></script>
+<script src="./vendor/three/EffectComposer.js"></script>
+<script src="./vendor/three/ConvolutionShader.js"></script>
+<script src="./vendor/three/BloomPass.js"></script>
+<script src="./vendor/three/RenderPass.js"></script>
+<script src="./vendor/three/DigitalGlitch.js"></script>
+<script src="./vendor/three/GlitchPass.js"></script>
+<script src="./vendor/three/ShaderPass.js"></script>
+<script src="./vendor/three/SobelOperatorShader.js"></script>
+<script src="./webgl-demo.js"></script>
+
+</html>
